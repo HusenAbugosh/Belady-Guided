@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useSpring, Variants, useTransform } from 'framer-motion';
 import { HeroScene } from './components/QuantumScene';
-import { CacheSimulatorDiagram, ArchitectureFlowDiagram, ResultsChart, ResearchTimeline, LRUvsHybridComparison } from './components/Diagrams';
+import { CacheSimulatorDiagram, ArchitectureFlowDiagram, ResultsChart, ResearchTimeline, LRUvsHybridComparison, TwoPhaseFlow } from './components/Diagrams';
 import { ArrowDown, Menu, X, Cpu, ShieldCheck, Zap, BookOpen, Search, AlertTriangle, Lightbulb, Target, Moon, Sun, Download } from 'lucide-react';
 
 const profAymanImage = new URL('./prof_ayamn.jpg', import.meta.url).href;
@@ -253,7 +253,7 @@ const App: React.FC = () => {
             <span className="font-semibold">Kareem Alqutob</span>
             <span className="text-stone-400 dark:text-stone-500">ID: 1211756</span>
             <span className="hidden md:inline text-stone-300 dark:text-stone-700">|</span>
-            <span className="font-semibold">Hussain Abughosh</span>
+            <span className="font-semibold">Husain Abughosh</span>
             <span className="text-stone-400 dark:text-stone-500">ID: 1210338</span>
           </div>
           <div className="flex justify-center animate-fade-in-up delay-200">
@@ -302,16 +302,17 @@ const App: React.FC = () => {
                 </div>
 
                 <motion.div 
-                    className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: "-100px" }}
                 >
                     {[
-                        { title: "Lightweight ML Model", desc: "A hardware-friendly Decision Tree implementation suitable for latency-critical L2 caches." },
-                        { title: "Uncertainty Awareness", desc: "A novel fallback mechanism that detects low-confidence predictions and defaults to LRU for safety." },
-                        { title: "Robustness Guarantee", desc: "Empirically proven 0% regression on friendly workloads while improving hostile patterns." }
+                        { title: "Belady-Guided ML Policy", desc: "Lightweight supervised model that approximates optimal evictions using only past access history available at runtime." },
+                        { title: "Uncertainty-Aware Safety", desc: "Confidence check on prediction dispersion that defers to LRU when unsure, matching the baseline’s bounded worst-case behavior." },
+                        { title: "Practical, Hardware-Ready Design", desc: "Avoids deep models in favor of a simple, low-overhead policy that fits hardware-oriented implementations." },
+                        { title: "Trace-Driven Evidence", desc: "Implemented in a cache simulator, improving hit rate over LRU across diverse workloads while staying stable on LRU-friendly traces." }
                     ].map((item, i) => (
                         <motion.div key={i} variants={itemVariants} className="bg-stone-800 p-8 rounded-xl border border-stone-700 hover:border-nobel-gold transition-colors">
                             <div className="w-12 h-12 bg-stone-900 rounded-full flex items-center justify-center mb-4 text-nobel-gold font-bold text-xl font-serif">
@@ -328,7 +329,7 @@ const App: React.FC = () => {
         {/* 4. Related Work & Gap */}
         <motion.section id="related" className="py-24 bg-[#F5F4F0] dark:bg-stone-900 border-t border-stone-100 dark:border-stone-800 transition-colors" {...sectionAnimProps}>
             <div className="container mx-auto px-6">
-                <SectionHeader icon={Search} title="03. Related Work & Gap" subtitle="Why existing solutions fail" />
+                <SectionHeader icon={Search} title="03. Related Work & Gap" subtitle="What we enhance" />
                 
                 <motion.div 
                     className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12"
@@ -393,6 +394,28 @@ const App: React.FC = () => {
                         <p className="text-lg text-stone-600 dark:text-stone-300 mb-6 leading-relaxed">
                            Our solution mimics Belady's algorithm by training a model to predict <strong>Reuse Distance</strong>.
                         </p>
+                        <p className="text-sm text-stone-500 dark:text-stone-400 mb-6 leading-relaxed">
+                            Offline we extract <strong>recency</strong> and <strong>frequency</strong> features from Python-synthesized traces, label every eviction with Belady, and train a shallow Decision Tree (depth ≤ 8) for low-latency inference. At runtime we recompute the same features, score candidates, and gate the decision with a confidence threshold τ = 0.88; low-confidence calls fall back to LRU to bound worst-case behavior.
+                        </p>
+                        <div className="mb-6">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-[11px] font-bold uppercase tracking-[0.2em] rounded-sm border border-stone-200 dark:border-stone-700 mb-3">
+                                Two-Phase Flow
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="p-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
+                                    <div className="flex items-center gap-2 mb-2 text-stone-900 dark:text-white font-semibold">
+                                        <BookOpen size={16} className="text-nobel-gold" /> Offline Training
+                                    </div>
+                                    <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed">Label synthesized traces with Belady, extract past-access features, and train the lightweight decision tree.</p>
+                                </div>
+                                <div className="p-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
+                                    <div className="flex items-center gap-2 mb-2 text-stone-900 dark:text-white font-semibold">
+                                        <Zap size={16} className="text-nobel-gold" /> Online Inference
+                                    </div>
+                                    <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed">At runtime the cache queries the model; confident scores drive eviction, otherwise the policy falls back to LRU.</p>
+                                </div>
+                            </div>
+                        </div>
                         <ul className="space-y-4 mb-8">
                             <li className="flex items-start gap-3">
                                 <div className="p-2 bg-stone-100 dark:bg-stone-800 rounded-full mt-1"><BookOpen size={16} className="text-stone-600 dark:text-stone-300"/></div>
@@ -413,6 +436,10 @@ const App: React.FC = () => {
                     <div>
                         <ArchitectureFlowDiagram />
                     </div>
+                </div>
+
+                <div className="mt-10">
+                    <TwoPhaseFlow />
                 </div>
 
                  {/* Simulator as part of solution demo */}
@@ -436,15 +463,19 @@ const App: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                     <div className="lg:col-span-4 space-y-6">
                         <p className="text-lg text-stone-600 dark:text-stone-300">
-                            We evaluated the design on 10 distinct workloads from the SPEC CPU 2017 suite.
+                            We evaluated the design using Python-synthesized memory-access traces spanning friendly, mixed, alternating, and scan-heavy patterns. Cache hit rate (hits/(hits+misses)) is the primary metric because it directly reflects stall-time reduction and off-chip traffic.
                         </p>
                         <div className="p-4 bg-white dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700">
+                            <div className="text-3xl font-bold text-nobel-gold mb-1">+11.7%</div>
+                            <div className="text-xs text-stone-500 dark:text-stone-400 uppercase font-bold tracking-wider">Avg Hit-Rate Improvement vs LRU</div>
+                        </div>
+                        <div className="p-4 bg-white dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700">
                             <div className="text-3xl font-bold text-nobel-gold mb-1">+20.4%</div>
-                            <div className="text-xs text-stone-500 dark:text-stone-400 uppercase font-bold tracking-wider">Max Improvement</div>
+                            <div className="text-xs text-stone-500 dark:text-stone-400 uppercase font-bold tracking-wider">Max Hit-Rate Improvement vs LRU</div>
                         </div>
                         <div className="p-4 bg-white dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700">
                             <div className="text-3xl font-bold text-stone-900 dark:text-white mb-1">0.0%</div>
-                            <div className="text-xs text-stone-500 dark:text-stone-400 uppercase font-bold tracking-wider">Regression</div>
+                            <div className="text-xs text-stone-500 dark:text-stone-400 uppercase font-bold tracking-wider">Worst-Case Change vs LRU (Hit Rate)</div>
                         </div>
                     </div>
                     <div className="lg:col-span-8">
@@ -503,10 +534,10 @@ const App: React.FC = () => {
                  <div>
                     <SectionHeader icon={Lightbulb} title="07. Conclusion" subtitle="Final Thoughts" />
                     <p className="text-lg text-stone-600 dark:text-stone-300 mb-6 leading-relaxed">
-                        We have successfully demonstrated that <strong>Uncertainty Awareness</strong> is the key to practical Machine Learning in memory systems.
+                        On Python-synthesized traces spanning friendly, mixed, alternating, and scan-heavy patterns, the Belady-guided policy lifted cache hit rate (hits ÷ total accesses) by about <strong>11.7% on average</strong> and up to <strong>20.4%</strong> versus LRU, while the confidence gate preserved <strong>0% worst-case change</strong> on LRU-friendly workloads by falling back when predictions were uncertain.
                     </p>
                     <p className="text-lg text-stone-600 dark:text-stone-300 mb-6 leading-relaxed">
-                        By bridging the gap between theoretical optimality and hardware constraints, we provide a replacement policy that is both high-performance and safe for general-purpose computing.
+                        This selective learning approach couples Belady-inspired labels with a lightweight model and an uncertainty-aware safeguard, yielding practical gains without sacrificing stability; the next steps are to exercise the policy on real application traces, extend it to deeper cache hierarchies, and validate hardware-oriented implementations.
                     </p>
                  </div>
                  <div className="bg-[#F5F4F0] dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col justify-center">
@@ -523,7 +554,7 @@ const App: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
                      <AuthorCard name="Kareem Alqutob" role="Computer engineer student" email="1211756" delay="0.1s" image={kareemImage}/>
                      <AuthorCard name="Dr. Ayman" role="Supervisor" delay="0s" image={profAymanImage}/>
-                     <AuthorCard name="Hussain Abughosh" role="Computer engineer student" email="1210338" delay="0.2s" image={hussainImage}/>
+                     <AuthorCard name="Husain Abughosh" role="Computer engineer student" email="1210338" delay="0.2s" image={hussainImage}/>
                 </div>
            </div>
         </motion.section>

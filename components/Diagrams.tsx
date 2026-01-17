@@ -540,9 +540,93 @@ export const ArchitectureFlowDiagram: React.FC = () => {
   );
 };
 
+// --- TWO-PHASE FLOW (Offline / Online) ---
+export const TwoPhaseFlow: React.FC = () => {
+    const offlineSteps = [
+        { label: 'Trace', detail: 'Memory Access Trace', icon: <Layers size={16} /> },
+        { label: 'Features', detail: 'Feature Extraction', icon: <FileCode size={16} /> },
+        { label: 'Oracle', detail: 'Belady Labels', icon: <Database size={16} /> },
+        { label: 'Dataset', detail: 'Features + Labels', icon: <CheckCircle size={16} /> },
+        { label: 'Training', detail: 'ML Model Training', icon: <Brain size={16} /> },
+        { label: 'Model', detail: 'Trained Model', icon: <Shield size={16} /> },
+    ];
+
+    const onlineSteps = [
+        { label: 'Miss', detail: 'Cache Miss Event', icon: <AlertCircle size={16} /> },
+        { label: 'Set', detail: 'Candidate Blocks', icon: <Layers size={16} /> },
+        { label: 'Features', detail: 'Feature Extraction', icon: <FileCode size={16} /> },
+        { label: 'Predict', detail: 'ML Predictor', icon: <Brain size={16} /> },
+        { label: 'Confidence', detail: 'Prediction Confident?', icon: <Activity size={16} /> },
+        { label: 'Decision', detail: 'ML Eviction / LRU', icon: <Shield size={16} /> },
+    ];
+
+    const [offlineIdx, setOfflineIdx] = useState(0);
+    const [onlineIdx, setOnlineIdx] = useState(0);
+
+    useEffect(() => {
+        const id = setInterval(() => {
+            setOfflineIdx((i) => (i + 1) % offlineSteps.length);
+            setOnlineIdx((i) => (i + 1) % onlineSteps.length);
+        }, 1400);
+        return () => clearInterval(id);
+    }, []);
+
+    const renderFlow = (title: string, steps: typeof offlineSteps, activeIdx: number) => (
+        <div className="p-6 rounded-2xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-sm">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-stone-500 mb-4">{title}</div>
+            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+                {steps.map((step, idx) => (
+                    <React.Fragment key={step.label}>
+                        <motion.div
+                            initial={false}
+                            animate={activeIdx === idx ? { scale: 1.05, boxShadow: '0 10px 25px rgba(197,160,89,0.18)' } : { scale: 1, boxShadow: '0 0px 0px rgba(0,0,0,0)' }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            className={`flex flex-col items-center justify-center min-w-[110px] px-3 py-3 rounded-xl border text-center ${
+                                activeIdx === idx 
+                                  ? 'border-nobel-gold bg-white dark:bg-stone-800 text-stone-900 dark:text-white' 
+                                  : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 text-stone-500 dark:text-stone-400'
+                            }`}
+                        >
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
+                                activeIdx === idx ? 'bg-nobel-gold/15 text-nobel-gold' : 'bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-300'
+                            }`}>
+                                {step.icon}
+                            </div>
+                            <div className="text-[11px] font-semibold tracking-wide uppercase">{step.label}</div>
+                            <div className="text-[11px] text-stone-500 dark:text-stone-400 mt-1 leading-snug">{step.detail}</div>
+                        </motion.div>
+                        {idx < steps.length - 1 && (
+                            <div className="flex-1 h-0.5 min-w-[36px] bg-stone-200 dark:bg-stone-700 rounded-full relative">
+                                {activeIdx >= idx + 1 && (
+                                    <motion.div 
+                                        className="absolute inset-0 bg-nobel-gold rounded-full"
+                                        initial={{ width: '0%' }}
+                                        animate={{ width: '100%' }}
+                                        transition={{ duration: 0.4 }}
+                                    />
+                                )}
+                            </div>
+                        )}
+                    </React.Fragment>
+                ))}
+            </div>
+            <div className="mt-4 text-sm text-center text-stone-600 dark:text-stone-300">
+                {steps[activeIdx]?.detail}
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="space-y-4">
+            {renderFlow('Offline Training (Belady-Guided)', offlineSteps, offlineIdx)}
+            {renderFlow('Online Runtime (Confidence-Gated)', onlineSteps, onlineIdx)}
+        </div>
+    );
+};
+
 // --- RESULTS CHART ---
 export const ResultsChart: React.FC = () => {
-    // Data from Table I in the paper
+    // Data from synthesized trace experiments
     const workloads = [
         { name: 'Friendly', lru: 99.99, hybrid: 99.99, type: 'stable' },
         { name: 'Mixed', lru: 33.92, hybrid: 42.37, type: 'improved' },
@@ -558,7 +642,7 @@ export const ResultsChart: React.FC = () => {
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h3 className="font-serif text-2xl text-stone-900 dark:text-white">Hit Rate Comparison</h3>
-                    <p className="text-sm text-stone-500 dark:text-stone-400">Proposed Hybrid Policy vs LRU Baseline</p>
+                    <p className="text-sm text-stone-500 dark:text-stone-400">Proposed Hybrid Policy vs LRU Baseline on synthesized traces</p>
                 </div>
                 <div className="flex gap-4 text-xs font-bold uppercase tracking-wider">
                     <div className="flex items-center gap-2 text-stone-600 dark:text-stone-400"><div className="w-3 h-3 bg-stone-300 dark:bg-stone-600"></div> LRU</div>
@@ -613,7 +697,7 @@ export const ResultsChart: React.FC = () => {
             </div>
             
             <div className="mt-6 p-4 bg-stone-50 dark:bg-stone-900 rounded text-xs text-stone-600 dark:text-stone-300 leading-relaxed border border-stone-100 dark:border-stone-800">
-                <strong>Analysis:</strong> The Alternating workload shows a massive <strong>+20.44%</strong> improvement. Note how the "Friendly" workload maintains parity (99.99%) due to the uncertainty-aware fallback mechanism, avoiding the regression common in pure ML policies.
+                <strong>Analysis:</strong> The Alternating workload shows a massive <strong>+20.44%</strong> improvement. The "Friendly" workload maintains parity (99.99%) because the uncertainty-aware fallback steers away from low-confidence ML choices, preventing hit-rate loss.
             </div>
         </div>
     );
@@ -632,33 +716,33 @@ export const ResearchTimeline: React.FC = () => {
 
     const phases: TimelinePhase[] = [
         {
-            title: "Trace Analysis",
-            description: "Profiling standard benchmarks to identify cache deficiencies.",
-            details: "Used ChampSim to gather traces from SPEC CPU 2017. Identified high miss rates in 'mixed' workloads where LRU fails to capture long-distance reuse.",
+            title: "Trace Synthesis",
+            description: "Generate patterned workloads in Python to stress LRU.",
+            details: "Built 10 synthetic, 1M-access traces (friendly, mixed, alternating, scan-heavy, phase-based, noisy) to expose reuse patterns and LRU blind spots.",
             icon: Search
         },
         {
             title: "Oracle Labeling",
             description: "Generating ground-truth data using Belady's Optimal Algorithm.",
-            details: "Ran Belady's MIN algorithm on traces to determine the theoretically perfect eviction decisions. These binary labels (Reuse / No-Reuse) serve as the training target.",
+            details: "Ran Belady/MIN on the first 200K accesses of each trace; labeled candidates as keep/evict to create supervised targets while holding out the remaining 800K for evaluation.",
             icon: Database
         },
         {
-            title: "Model Training",
-            description: "Developing a lightweight, uncertainty-aware Decision Tree.",
-            details: "Trained a shallow Decision Tree (max-depth 8) using Scikit-learn. Focused on two key features: Program Counter (PC) and Stack Distance. Integrated confidence thresholds.",
+            title: "Feature & Model",
+            description: "Lightweight recency/frequency model with bounded depth.",
+            details: "Used only past-access recency and frequency features; trained a shallow Decision Tree (max depth 8, min samples split 20, min leaf 10, class_weight balanced) to keep inference cheap.",
             icon: Brain
         },
         {
-            title: "Hardware Design",
-            description: "Synthesizing the inference engine for real-time operation.",
-            details: "Implemented the decision logic in Verilog. Optimized for critical path latency to ensure the prediction happens within a single clock cycle of the L2 cache controller.",
-            icon: Cpu
+            title: "Confidence Gate",
+            description: "Uncertainty-aware runtime fallback to LRU.",
+            details: "Applied a confidence threshold τ = 0.88 on prediction dispersion; high confidence → ML eviction, low confidence → LRU to bound worst-case behavior.",
+            icon: Shield
         },
         {
             title: "Validation",
-            description: "Benchmarking the hybrid policy against state-of-the-art.",
-            details: "Simulated the design across 10 diverse workloads. Achieved up to 20% hit rate improvement while maintaining 0% regression on friendly patterns.",
+            description: "Trace-driven simulation against LRU baseline.",
+            details: "Evaluated on held-out trace portions in a 32KB set-associative simulator; observed ~11.7% average and up to 20.4% hit-rate gains with 0% worst-case change on LRU-friendly traces.",
             icon: Flag
         }
     ];
