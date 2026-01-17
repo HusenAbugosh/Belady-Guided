@@ -343,10 +343,10 @@ const App: React.FC = () => {
                             <h3 className="font-bold text-lg dark:text-white">LRU (Baseline)</h3>
                             <span className="text-xs font-mono bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded dark:text-stone-300">Heuristic</span>
                         </div>
-                        <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Evicts the Least Recently Used block.</p>
+                        <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Evicts the least recently used block; great when temporal locality holds, brittle on scans/alternating phases.</p>
                         <ul className="text-sm space-y-2 text-stone-500 dark:text-stone-400">
-                            <li className="flex gap-2"><span className="text-green-500">✓</span> Simple to implement</li>
-                            <li className="flex gap-2"><span className="text-red-500">✗</span> Fails on "scan" patterns</li>
+                            <li className="flex gap-2"><span className="text-green-500">✓</span> Minimal hardware cost, predictable</li>
+                            <li className="flex gap-2"><span className="text-red-500">✗</span> Misses long-distance reuse; thrashes on streaming/phase shifts</li>
                         </ul>
                     </motion.div>
 
@@ -355,22 +355,22 @@ const App: React.FC = () => {
                             <h3 className="font-bold text-lg dark:text-white">Belady (Oracle)</h3>
                             <span className="text-xs font-mono bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded dark:text-stone-300">Theoretical</span>
                         </div>
-                        <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Evicts block used farthest in future.</p>
+                        <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Evicts the block used farthest in the future; establishes the optimal hit rate upper bound.</p>
                         <ul className="text-sm space-y-2 text-stone-500 dark:text-stone-400">
-                            <li className="flex gap-2"><span className="text-green-500">✓</span> Optimal Hit Rate</li>
-                            <li className="flex gap-2"><span className="text-red-500">✗</span> Impossible in hardware</li>
+                            <li className="flex gap-2"><span className="text-green-500">✓</span> Optimal hit rate reference</li>
+                            <li className="flex gap-2"><span className="text-red-500">✗</span> Requires future knowledge; not implementable</li>
                         </ul>
                     </motion.div>
 
                     <motion.div variants={itemVariants} className="bg-white dark:bg-stone-800 p-8 rounded-xl shadow-sm border border-stone-200 dark:border-stone-700">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-lg dark:text-white">Existing ML</h3>
-                            <span className="text-xs font-mono bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded dark:text-stone-300">Perceptron/NN</span>
+                            <h3 className="font-bold text-lg dark:text-white">Prior ML Policies</h3>
+                            <span className="text-xs font-mono bg-stone-100 dark:bg-stone-700 px-2 py-1 rounded dark:text-stone-300">Perceptron/NN/RL</span>
                         </div>
-                        <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Approximates Belady using history.</p>
+                        <p className="text-sm text-stone-600 dark:text-stone-400 mb-4">Approximate Belady with learned scores but often add complexity or regress on unseen patterns.</p>
                         <ul className="text-sm space-y-2 text-stone-500 dark:text-stone-400">
-                            <li className="flex gap-2"><span className="text-green-500">✓</span> Adapts to patterns</li>
-                            <li className="flex gap-2"><span className="text-red-500">✗</span> Complex & Unstable</li>
+                            <li className="flex gap-2"><span className="text-green-500">✓</span> Capture richer reuse behavior than LRU</li>
+                            <li className="flex gap-2"><span className="text-red-500">✗</span> Deep/online models can be unstable or hardware-heavy</li>
                         </ul>
                     </motion.div>
                 </motion.div>
@@ -378,8 +378,14 @@ const App: React.FC = () => {
                 <div className="bg-white dark:bg-stone-800 p-8 rounded-xl border-l-4 border-red-400 shadow-sm dark:border-t dark:border-r dark:border-b dark:border-stone-700">
                     <h3 className="font-bold text-stone-900 dark:text-white text-lg mb-2">The Literature Gap</h3>
                     <p className="text-stone-600 dark:text-stone-300 text-lg">
-                        "There is a lack of lightweight, hardware-friendly ML policies that can guarantee <strong>safety</strong>. Most ML policies regress significantly when they encounter patterns they weren't trained on."
+                        "There is a lack of <strong>lightweight, safety-aware</strong> ML policies that approximate Belady while guaranteeing LRU-like worst-case behavior. Heavy ML can regress on new patterns; pure heuristics leave performance untapped."
                     </p>
+                    <ul className="mt-4 space-y-2 text-sm text-stone-600 dark:text-stone-300">
+                        <li className="flex gap-2"><span className="text-nobel-gold font-bold">•</span>Deep/online models (Glider, CHROME) add inference cost and risk instability.</li>
+                        <li className="flex gap-2"><span className="text-nobel-gold font-bold">•</span>Imitation learners (Hawkeye, PARROT) improve hits but lack explicit confidence gating.</li>
+                        <li className="flex gap-2"><span className="text-nobel-gold font-bold">•</span>Safety is rarely enforced; worst-case behavior can drop below LRU.</li>
+                        <li className="flex gap-2"><span className="text-nobel-gold font-bold">•</span>Hardware-friendly designs need shallow models and deterministic fallbacks.</li>
+                    </ul>
                 </div>
             </div>
         </motion.section>
