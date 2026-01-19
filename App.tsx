@@ -71,7 +71,7 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
-  const paperDownloadUrl = 'https://drive.google.com/file/d/1APjAGBgB-6ojptIrknhQxPrkmsXDGDKt/view?usp=sharing';
+  const paperDownloadUrl = 'https://drive.google.com/file/d/11SIjsHc4N6XmDVQYXjPFJs3XUvRAemwX/view?usp=sharing';
   
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
