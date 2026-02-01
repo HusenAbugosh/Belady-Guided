@@ -8,7 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useSpring, Variants, useTransform } from 'framer-motion';
 import { HeroScene } from './components/QuantumScene';
 import { CacheSimulatorDiagram, ArchitectureFlowDiagram, ResultsChart, ResearchTimeline, LRUvsHybridComparison, TwoPhaseFlow } from './components/Diagrams';
-import { ArrowDown, Menu, X, Cpu, ShieldCheck, Zap, BookOpen, Search, AlertTriangle, Lightbulb, Target, Moon, Sun, Download } from 'lucide-react';
+import { ArrowDown, Menu, X, Cpu, ShieldCheck, Zap, BookOpen, Search, AlertTriangle, Lightbulb, Target, Moon, Sun, Download, BarChart2, Flag } from 'lucide-react';
 
 const profAymanImage = new URL('./prof_ayamn.jpg', import.meta.url).href;
 const kareemImage = new URL('./kareem.jpg', import.meta.url).href;
@@ -72,6 +72,18 @@ const App: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const paperDownloadUrl = 'https://drive.google.com/file/d/11SIjsHc4N6XmDVQYXjPFJs3XUvRAemwX/view?usp=sharing';
+  const mlUsageData = [
+    { workload: "Mixed", usage: 95 },
+    { workload: "Hostile", usage: 99 },
+    { workload: "Friendly", usage: 0 },
+    { workload: "Scan Heavy", usage: 98 },
+    { workload: "Phases", usage: 75 },
+    { workload: "Alternating", usage: 99 },
+    { workload: "Mixed Difficulty", usage: 96 },
+    { workload: "Gradual Shift", usage: 92 },
+    { workload: "Random Bursts", usage: 85 },
+    { workload: "Noisy Patterns", usage: 88 },
+  ];
   
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -178,6 +190,7 @@ const App: React.FC = () => {
             <NavLink href="#contributions" onClick={(e) => smoothScroll(e, 'contributions')}>Contributions</NavLink>
             <NavLink href="#solution" onClick={(e) => smoothScroll(e, 'solution')}>Solution</NavLink>
             <NavLink href="#results" onClick={(e) => smoothScroll(e, 'results')}>Results</NavLink>
+            <NavLink href="#ml-usage" onClick={(e) => smoothScroll(e, 'ml-usage')}>ML Usage</NavLink>
             <NavLink href="#paper" onClick={(e) => smoothScroll(e, 'paper')}>Paper</NavLink>
             <NavLink href="#conclusion" onClick={(e) => smoothScroll(e, 'conclusion')}>Conclusion</NavLink>
             
@@ -213,6 +226,7 @@ const App: React.FC = () => {
             <a href="#contributions" onClick={(e) => smoothScroll(e, 'contributions')} className="hover:text-nobel-gold">Contributions</a>
             <a href="#solution" onClick={(e) => smoothScroll(e, 'solution')} className="hover:text-nobel-gold">Solution</a>
             <a href="#results" onClick={(e) => smoothScroll(e, 'results')} className="hover:text-nobel-gold">Results</a>
+            <a href="#ml-usage" onClick={(e) => smoothScroll(e, 'ml-usage')} className="hover:text-nobel-gold">ML Usage</a>
             <a href="#paper" onClick={(e) => smoothScroll(e, 'paper')} className="hover:text-nobel-gold">Paper</a>
             <a href="#conclusion" onClick={(e) => smoothScroll(e, 'conclusion')} className="hover:text-nobel-gold">Conclusion</a>
         </div>
@@ -491,10 +505,62 @@ const App: React.FC = () => {
             </div>
         </motion.section>
 
-        {/* 6. Paper Download */}
+        {/* 6. ML Usage */}
+        <motion.section id="ml-usage" className="py-24 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 transition-colors" {...sectionAnimProps}>
+            <div className="container mx-auto px-6">
+                <SectionHeader icon={BarChart2} title="06. ML Usage" subtitle="Confidence-Gated Decisions in Practice" />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    <div className="lg:col-span-5 space-y-4">
+                        <p className="text-lg text-stone-600 dark:text-stone-300 leading-relaxed">
+                            The uncertainty gate activates the model only when it is confident; otherwise, the policy reverts to LRU. Usage percentages below show how often the model drove evictions across workloads.
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">
+                                <div className="text-3xl font-bold text-nobel-gold mb-1">0%</div>
+                                <p className="text-sm text-stone-600 dark:text-stone-400">ML usage on LRU-friendly traces (safely matches baseline).</p>
+                            </div>
+                            <div className="p-4 rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">
+                                <div className="text-3xl font-bold text-nobel-gold mb-1">99%</div>
+                                <p className="text-sm text-stone-600 dark:text-stone-400">Peak ML reliance on adversarial workloads where gains were largest.</p>
+                            </div>
+                        </div>
+                        <p className="text-sm text-stone-500 dark:text-stone-400">
+                            Takeaway: the gate aggressively leverages learning when it helps and cleanly backs off when it doesn’t.
+                        </p>
+                    </div>
+                    <div className="lg:col-span-7">
+                        <div className="mb-6 p-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-sm">
+                            <div className="flex items-center justify-between mb-3">
+                                <h4 className="text-sm font-semibold text-stone-900 dark:text-white">Confidence-Gated Evictions (Bar View)</h4>
+                                <span className="text-xs uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">Higher = More ML</span>
+                            </div>
+                            <div className="space-y-2">
+                                {mlUsageData.map((row) => (
+                                    <div key={row.workload}>
+                                        <div className="flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 mb-1">
+                                            <span className="font-medium text-stone-800 dark:text-stone-100">{row.workload}</span>
+                                            <span>{row.usage}%</span>
+                                        </div>
+                                        <div className="w-full h-2.5 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+                                            <div
+                                                className="h-full rounded-full bg-gradient-to-r from-nobel-gold/80 to-nobel-gold"
+                                                style={{ width: `${row.usage}%` }}
+                                                aria-label={`${row.workload} machine learning usage ${row.usage} percent`}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </motion.section>
+
+        {/* 7. Paper Download */}
         <motion.section id="paper" className="py-24 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 transition-colors" {...sectionAnimProps}>
             <div className="container mx-auto px-6">
-                <SectionHeader icon={Download} title="06. Paper Download" subtitle="Get the full PDF" />
+                <SectionHeader icon={Download} title="07. Paper Download" subtitle="Get the full PDF" />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <div className="space-y-6">
                         <p className="text-lg text-stone-600 dark:text-stone-300 leading-relaxed">
@@ -534,17 +600,46 @@ const App: React.FC = () => {
             </div>
         </motion.section>
 
-        {/* 7. Conclusion */}
+        {/* 8. Conclusion */}
         <motion.section id="conclusion" className="py-24 bg-white dark:bg-stone-950 border-t border-stone-200 dark:border-stone-800 transition-colors" {...sectionAnimProps}>
              <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-16">
                  <div>
-                    <SectionHeader icon={Lightbulb} title="07. Conclusion" subtitle="Final Thoughts" />
+                    <SectionHeader icon={Lightbulb} title="08. Conclusion" subtitle="Final Thoughts" />
                     <p className="text-lg text-stone-600 dark:text-stone-300 mb-6 leading-relaxed">
                         On Python-synthesized traces spanning friendly, mixed, alternating, and scan-heavy patterns, the Belady-guided policy lifted cache hit rate (hits ÷ total accesses) by about <strong>11.7% on average</strong> and up to <strong>20.4%</strong> versus LRU, while the confidence gate preserved <strong>0% worst-case change</strong> on LRU-friendly workloads by falling back when predictions were uncertain.
                     </p>
                     <p className="text-lg text-stone-600 dark:text-stone-300 mb-6 leading-relaxed">
                         This selective learning approach couples Belady-inspired labels with a lightweight model and an uncertainty-aware safeguard, yielding practical gains without sacrificing stability; the next steps are to exercise the policy on real application traces, extend it to deeper cache hierarchies, and validate hardware-oriented implementations.
                     </p>
+                    <div className="relative mt-6 overflow-hidden rounded-2xl border border-stone-200 dark:border-stone-800 bg-gradient-to-br from-white via-white to-stone-50 dark:from-stone-900 dark:via-stone-900 dark:to-stone-950 shadow-sm">
+                        <div className="absolute -left-10 -top-12 h-28 w-28 bg-nobel-gold/15 blur-3xl" aria-hidden />
+                        <div className="absolute -right-8 -bottom-10 h-24 w-24 bg-nobel-gold/10 blur-3xl" aria-hidden />
+                        <div className="relative p-5 md:p-6 space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-full bg-nobel-gold/15 border border-nobel-gold/30 flex items-center justify-center">
+                                    <Flag size={18} className="text-nobel-gold" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-[0.25em] text-stone-500 dark:text-stone-400">Future Work</p>
+                                    <p className="text-sm text-stone-500 dark:text-stone-400">Concrete steps we plan to pursue next.</p>
+                                </div>
+                            </div>
+                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-stone-700 dark:text-stone-200 leading-relaxed">
+                                <li className="p-3 rounded-lg bg-stone-100/80 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                                    Evaluating the proposed policy on larger and more diverse workloads, including real application traces, to further validate generalization.
+                                </li>
+                                <li className="p-3 rounded-lg bg-stone-100/80 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                                    Extending the approach to multi-level and multicore cache hierarchies.
+                                </li>
+                                <li className="p-3 rounded-lg bg-stone-100/80 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                                    Exploring additional runtime features and alternative confidence estimation mechanisms to improve robustness under highly dynamic workloads.
+                                </li>
+                                <li className="p-3 rounded-lg bg-stone-100/80 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700">
+                                    Investigating hardware-oriented implementations and cycle-accurate simulations to assess practical deployment overhead.
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                  </div>
                  <div className="bg-[#F5F4F0] dark:bg-stone-900 p-8 rounded-xl border border-stone-100 dark:border-stone-800 flex flex-col justify-center">
                     <h3 className="font-bold text-stone-900 dark:text-white mb-6 uppercase tracking-widest text-sm">Development Methodology</h3>
